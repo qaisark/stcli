@@ -305,22 +305,26 @@ def trust_asset(text):
     asset_code = val[2]
 
     builder = transaction_builder()
-    if val[0][0] == "t":
-        print("trusting asset_code=" + asset_code + " issuer=" + asset_issuer)
-        builder.append_change_trust_op(asset_code, asset_issuer)
-    else:
-        print(
-            "untrusting asset_code="
-            + asset_code
-            + " issuer="
-            + asset_issuer
-            + ", please ensure your balance is 0 before this operation"
-        )
-        builder.append_change_trust_op(asset_code, asset_issuer, limit="0")
+    try:
+        if val[0][0] == "t":
+            print("trusting asset_code=" + asset_code + " issuer=" + asset_issuer)
+            builder.append_change_trust_op(asset_code, asset_issuer)
+        else:
+            print(
+                "untrusting asset_code="
+                + asset_code
+                + " issuer="
+                + asset_issuer
+                + ", please ensure your balance is 0 before this operation"
+            )
+            builder.append_change_trust_op(asset_code, asset_issuer, limit="0")
 
-    envelope = builder.build()
-    envelope.sign(keypair())
-    server().submit_transaction(envelope)
+        envelope = builder.build()
+        envelope.sign(keypair())
+        server().submit_transaction(envelope)
+    except Exception as e:
+        print("error " + str(e))
+        return
 
 
 def print_help():
@@ -626,9 +630,9 @@ def deposit(text):
             + CONF["network"]
         )
     )
-    if not list_balances(check_asset=asset):
-        print("ERROR need to trust asset: type trust %s %s" % (server, asset))
-        return
+    # if not list_balances(check_asset=asset):
+    #     print("ERROR need to trust asset: type trust %s %s" % (server, asset))
+    #     return
     FED = toml.loads(
         requests.get("https://" + server + "/.well-known/stellar.toml").text
     )
@@ -657,31 +661,36 @@ def deposit(text):
     r = requests.get(deposit_server, params=param)
     print(r.url)
     res = r.json()
-    if server in ["apay.io", "naobtc.com"]:
-        text = pyqrcode.create(res["how"])
-        print(text.terminal())
-    print(res)
-    min_amount = str(res.setdefault("min_amount", ""))
-    max_amount = str(res.setdefault("max_amount", ""))
-    print_formatted_text(
-        HTML(
-            "\nSEND "
-            + asset
-            + " to <ansiyellow> "
-            + res["how"]
-            + " </ansiyellow> you have "
-            + str(int(res["eta"] / 60))
-            + " min to make the payment. Amount min "
-            + asset
-            + " "
-            + min_amount
-            + " and max "
-            + max_amount
-            + " "
-            + res["extra_info"]
+    try:
+        if server in ["apay.io", "naobtc.com"]:
+            text = pyqrcode.create(res["how"])
+            print(text.terminal())
+        print(res)
+        min_amount = str(res.setdefault("min_amount", ""))
+        max_amount = str(res.setdefault("max_amount", ""))
+        print_formatted_text(
+            HTML(
+                "\nSEND "
+                + asset
+                + " to <ansiyellow> "
+                + res["how"]
+                + " </ansiyellow> you have "
+                + str(int(res["eta"] / 60))
+                + " min to make the payment. Amount min "
+                + asset
+                + " "
+                + min_amount
+                + " and max "
+                + max_amount
+                + " "
+                + res["extra_info"]
+            )
         )
-    )
-    return
+        return
+    except Exception:
+        print("error")
+        print(res)
+        return
 
 
 def set_multisig(trusted_key):
