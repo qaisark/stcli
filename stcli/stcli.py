@@ -630,9 +630,9 @@ def deposit(text):
             + CONF["network"]
         )
     )
-    # if not list_balances(check_asset=asset):
-    #     print("ERROR need to trust asset: type trust %s %s" % (server, asset))
-    #     return
+    if not list_balances(check_asset=asset):
+        print("ERROR need to trust asset: type trust %s %s" % (server, asset))
+        return
     FED = toml.loads(
         requests.get("https://" + server + "/.well-known/stellar.toml").text
     )
