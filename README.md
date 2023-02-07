@@ -20,8 +20,9 @@ THIS APP IS MADE FOR TESTING PURPOSES AUTHORS TAKE NO RESPONSIBILITY FOR USE
 
 
 ### Prerequisites
-Command line - preferably Linux but MacOS or Windows 10 with Linux should work
-* python
+Command line - preferably Linux but MacOS or Windows 10 with Linux should work. Python 3.8+ is required 
+
+* python 
 * zip/unzip
 
 ### Installing
